@@ -19,9 +19,13 @@ export const name = 'dsh-look'
 export const inject = ['tools', 'systemPrompt']
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
-const HELPER = join(ROOT, '..', 'bin', 'look')
+// Prebuilt per-arch helper; falls back to bin/look (npm run build:native).
+const BIN_DIR = join(ROOT, '..', 'bin')
+const ARCH_BIN = process.arch === 'arm64' ? 'look-arm64' : process.arch === 'x64' ? 'look-x64' : null
+const HELPER = ARCH_BIN && existsSync(join(BIN_DIR, ARCH_BIN)) ? join(BIN_DIR, ARCH_BIN) : join(BIN_DIR, 'look')
 // Self-identification: the host (this process) is inside the DSH app.
-const SELF_BUNDLE = 'local.menke.xiaoguang.dsh'
+// Override with DSH_SELF_BUNDLE when running inside a differently-bundled DSH desktop build.
+const SELF_BUNDLE = process.env.DSH_SELF_BUNDLE || 'local.menke.xiaoguang.dsh'
 const HELPER_TIMEOUT_MS = 8000
 // Summon hotkey: ⌥⌘Z — the DSH app's own bubble/expand toggle. Our listen-only
 // event tap rides the same combo: one press summons the app (built-in shortcut)

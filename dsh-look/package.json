@@ -1,17 +1,48 @@
 {
   "name": "dsh-look",
   "version": "0.1.0",
-  "description": "M0 scene-awareness probe: a zero-permission `look` tool that reads the frontmost non-self window (app-level info only) on macOS, with system-prompt guidance for when the agent should call it.",
+  "description": "Scene-awareness probe for DeepSeek Harness: a privacy-first `look` tool that reads the frontmost non-self window (app / AX / local OCR) on macOS, plus summon-hotkey snapshot capture.",
   "type": "module",
   "main": "lib/index.js",
-  "files": ["lib", "bin", "native", "cordis.patch.yml", "README.md"],
+  "files": [
+    "lib",
+    "bin",
+    "native",
+    "cordis.patch.yml",
+    "README.md"
+  ],
   "license": "MIT",
-  "os": ["darwin"],
-  "engines": { "node": ">=20" },
+  "os": [
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build:native": "mkdir -p bin && swiftc -O -module-cache-path ./build/mc native/look.swift -o bin/look"
   },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" }
-  }
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mengxiaoxian/lookover.git",
+    "directory": "dsh-look"
+  },
+  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-look",
+  "author": "mengxiaoxian (程蒙博)",
+  "bugs": {
+    "url": "https://github.com/mengxiaoxian/lookover/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "macos",
+    "accessibility",
+    "ocr",
+    "agent",
+    "context-aware"
+  ]
 }

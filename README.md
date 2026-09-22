@@ -13,6 +13,26 @@
 
 ---
 
+## Quick Start
+
+前置：macOS 12+、Node ≥ 20、已安装 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（桌面端或 `dsh web`）。
+
+**方式一：插件市场（推荐）** — DSH 里打开 设置 → 插件市场（[dshmarket](https://dshmarket.com)），搜索 `dsh-look` / `dsh-mem`，一键安装。
+
+**方式二：命令行**
+
+```sh
+dsh plugin --profile <你的profile> add dsh-look dsh-mem
+```
+
+**方式三：本地开发** — clone 本仓库，按 [`dsh-look/README.md`](dsh-look/README.md) / [`dsh-mem/README.md`](dsh-mem/README.md) 的 profile 配置安装。
+
+**权限与适配：**
+- 零权限即可用（app 档）；授予「辅助功能」解锁窗口标题/选中文本（ax 档），授予「屏幕录制」解锁 OCR（ocr 档）
+- 使用社区发行版 DSH 桌面端（非「小光」构建）时，设置环境变量 `DSH_SELF_BUNDLE=<你的桌面端bundleId>` 以正确过滤自窗口
+- npm 包内置 arm64 / x64 预编译 helper，无需本地构建；从源码构建用 `npm run build:native`
+- 不装宿主也能体验 dsh-mem 核心逻辑：`cd dsh-mem && npm run demo`
+
 ## 解决什么问题
 
 用 AI 助手时最大的摩擦不是「问不出答案」，而是**每换一个任务就要重新解释一遍背景**：

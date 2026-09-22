@@ -1,17 +1,46 @@
 {
   "name": "dsh-mem",
   "version": "0.1.0",
-  "description": "Personal-experience memory plugin for DSH: turns real Q&A tasks into sourced problem cases with condition-scoped claims, recalls them into new tasks, and makes corrections/deletes cascade to recall. Demo grade.",
+  "description": "Personal-experience memory plugin for DeepSeek Harness: sourced problem cases, condition-scoped claims, recall into new tasks, corrections that cascade.",
   "type": "module",
   "main": "lib/index.js",
-  "files": ["lib", "cordis.patch.yml", "README.md", "demo"],
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "demo"
+  ],
   "license": "MIT",
-  "os": ["darwin"],
-  "engines": { "node": ">=20" },
+  "os": [
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "demo": "node demo/demo.mjs"
   },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" }
-  }
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mengxiaoxian/lookover.git",
+    "directory": "dsh-mem"
+  },
+  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-mem",
+  "author": "mengxiaoxian (程蒙博)",
+  "bugs": {
+    "url": "https://github.com/mengxiaoxian/lookover/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "agent",
+    "memory",
+    "experience",
+    "recall"
+  ]
 }
