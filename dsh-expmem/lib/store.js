@@ -1,4 +1,4 @@
-// dsh-mem — storage layer (demo grade).
+// dsh-expmem — storage layer (demo grade).
 //
 // Five object kinds (MVP subset of the 2026-09-21 PRD §6):
 //   Project / Case / Source(embedded in Case) / Claim / Event(append-only).

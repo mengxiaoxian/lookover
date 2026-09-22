@@ -1,0 +1,7 @@
+{"id":"e_muc5l3gchu2q","ts":"2026-09-22T04:07:36.636Z","actor":"agent","action":"project.create","targetId":"p_muc5l3gbldmv","note":"dsh-expmem 方案验证"}
+{"id":"e_muc5l3gdccie","ts":"2026-09-22T04:07:36.637Z","actor":"agent","action":"case.create","targetId":"c_muc5l3gcsbtr","note":"本地记忆存储选型：结构化状态 + 可读内容怎么存"}
+{"id":"e_muc5l3gf1tbt","ts":"2026-09-22T04:07:36.639Z","actor":"agent","action":"claim.create","targetId":"k_muc5l3ge9qg5","note":"小规模个人记忆用 JSONL+Markdown 优于图数据库"}
+{"id":"e_muc5l3ggcbg5","ts":"2026-09-22T04:07:36.640Z","actor":"agent","action":"case.reuse","targetId":"c_muc5l3gcsbtr","note":null}
+{"id":"e_muc5l3ggc4pq","ts":"2026-09-22T04:07:36.640Z","actor":"agent","action":"case.create","targetId":"c_muc5l3ggw8ue","note":"Chrome 无障碍树默认不构建需要手动唤醒"}
+{"id":"e_muc5l3ghikqq","ts":"2026-09-22T04:07:36.641Z","actor":"user","action":"claim.ignore","targetId":"k_muc5l3ge9qg5","note":"用户：这不代表我的长期偏好"}
+{"id":"e_muc5l3gh22zd","ts":"2026-09-22T04:07:36.641Z","actor":"agent","action":"case.delete","targetId":"c_muc5l3gcsbtr","note":"清理测试"}

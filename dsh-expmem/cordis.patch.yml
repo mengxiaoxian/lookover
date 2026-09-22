@@ -1,0 +1,4 @@
+# bundle patch: insert dsh-expmem into the host composition
+- insert:
+    - id: dsh-expmem
+      name: dsh-expmem

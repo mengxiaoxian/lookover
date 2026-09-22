@@ -1,0 +1,1 @@
+{"id":"k_muc5l3ge9qg5","caseId":"c_muc5l3gcsbtr","projectId":"p_muc5l3gbldmv","conclusion":"小规模个人记忆用 JSONL+Markdown 优于图数据库","conditions":"单机单人、百级记录、索引可重建的前提下","counterExamples":"来源案例已删除","evidenceStatus":"pending","status":"invalid","version":1,"createdAt":"2026-09-22T04:07:36.638Z"}

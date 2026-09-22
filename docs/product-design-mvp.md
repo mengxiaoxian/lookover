@@ -1,4 +1,4 @@
-# MVP 产品需求与设计方案：个人经验型桌面助手（dsh-mem）
+# MVP 产品需求与设计方案：个人经验型桌面助手（dsh-expmem）
 
 日期：2026-09-21 ｜ 状态：MVP 需求草案 v1，待评审
 依据：《个人经验型桌面AI助手-产品方向评估-2026-09-21.md》（下称「评估」）、《产品方向对话记录_2026-09-20.md》、《HANDOFF-2026-09-20.md》（dsh-look 工程现状）
@@ -112,10 +112,10 @@ Claim n ─ 1 Project
 
 ### 8.1 总体
 
-新增 DSH 插件 `dsh-mem`（与 dsh-look 同构：`file:`/`link:` 协议挂入 `~/.dsh/profiles/desktop`），复用 DSH Host 的 agent 运行时与 skill 机制。**不从零建 Agent 平台，增量补链路**（评估 §12）。
+新增 DSH 插件 `dsh-expmem`（与 dsh-look 同构：`file:`/`link:` 协议挂入 `~/.dsh/profiles/desktop`），复用 DSH Host 的 agent 运行时与 skill 机制。**不从零建 Agent 平台，增量补链路**（评估 §12）。
 
 ```
-dsh-look（已有）                    dsh-mem（新建）
+dsh-look（已有）                    dsh-expmem（新建）
   look 快照 ──pre-step 注入──→  agent 回答（就地交付）
                                   │
                     ┌─────────────┼──────────────┐
@@ -193,5 +193,5 @@ dsh-look（已有）                    dsh-mem（新建）
 ## 附：与既有文档的关系
 
 - 本方案是评估文档 §10（MVP）的实施化，交互约束继承《产品方向对话记录_2026-09-20.md》的全部共识（就地召唤交付、通用架构×聚焦验证、拉模型隐私观）；
-- 工程上与 `dsh-look`（M0/M2-lite/M3 已验收）并行，新插件 `dsh-mem` 复用其快照与注入链路；
+- 工程上与 `dsh-look`（M0/M2-lite/M3 已验收）并行，新插件 `dsh-expmem` 复用其快照与注入链路；
 - 若验证结论为「记忆有益、空间无益」，降级为轻量助手/插件继续；「空间有益、记忆无工作收益」则重定位为个人回顾产品（评估 §11D 的分支决策表）。

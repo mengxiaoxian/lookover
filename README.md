@@ -9,7 +9,7 @@
 | 模块 | 是什么 | 一句话 |
 |---|---|---|
 | [`dsh-look/`](dsh-look/) | 场景感知探针 | 让 Agent 在被问到「这个/这个报错/这个页面」时，能真实读到你的屏幕上下文 |
-| [`dsh-mem/`](dsh-mem/) | 个人经验记忆 | 把解决过的问题存为带来源、可纠正的案例，下次相似任务直接召回 |
+| [`dsh-expmem/`](dsh-expmem/) | 个人经验记忆 | 把解决过的问题存为带来源、可纠正的案例，下次相似任务直接召回 |
 
 ---
 
@@ -17,21 +17,21 @@
 
 前置：macOS 12+、Node ≥ 20、已安装 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（桌面端或 `dsh web`）。
 
-**方式一：插件市场（推荐）** — DSH 里打开 设置 → 插件市场（[dshmarket](https://dshmarket.com)），搜索 `dsh-look` / `dsh-mem`，一键安装。
+**方式一：插件市场（推荐）** — DSH 里打开 设置 → 插件市场（[dshmarket](https://dshmarket.com)），搜索 `dsh-look` / `dsh-expmem`，一键安装。
 
 **方式二：命令行**
 
 ```sh
-dsh plugin --profile <你的profile> add dsh-look dsh-mem
+dsh plugin --profile <你的profile> add dsh-look dsh-expmem
 ```
 
-**方式三：本地开发** — clone 本仓库，按 [`dsh-look/README.md`](dsh-look/README.md) / [`dsh-mem/README.md`](dsh-mem/README.md) 的 profile 配置安装。
+**方式三：本地开发** — clone 本仓库，按 [`dsh-look/README.md`](dsh-look/README.md) / [`dsh-expmem/README.md`](dsh-expmem/README.md) 的 profile 配置安装。
 
 **权限与适配：**
 - 零权限即可用（app 档）；授予「辅助功能」解锁窗口标题/选中文本（ax 档），授予「屏幕录制」解锁 OCR（ocr 档）
 - 使用社区发行版 DSH 桌面端（非「小光」构建）时，设置环境变量 `DSH_SELF_BUNDLE=<你的桌面端bundleId>` 以正确过滤自窗口
 - npm 包内置 arm64 / x64 预编译 helper，无需本地构建；从源码构建用 `npm run build:native`
-- 不装宿主也能体验 dsh-mem 核心逻辑：`cd dsh-mem && npm run demo`
+- 不装宿主也能体验 dsh-expmem 核心逻辑：`cd dsh-expmem && npm run demo`
 
 ## 解决什么问题
 
@@ -61,7 +61,7 @@ dsh-look 探针 ── 按下瞬间抓一次快照（热快照 39ms）
    ├─ ax 档（辅助功能权限）: + 窗口标题 / 文档 URL / 选中文本 / 焦点元素
    └─ ocr 档（录屏权限）:   + 截图 → macOS Vision 本地 OCR（零 token）
    ▼  agent/pre-step 隐藏注入（TTL 5min，防噪）
-DSH 宿主 Agent ── 基于共享快照回答 / 召回 dsh-mem 经验案例
+DSH 宿主 Agent ── 基于共享快照回答 / 召回 dsh-expmem 经验案例
    ▼
 答案交付在气泡（锚定注意力位置，不改前台 App）
 ```
@@ -101,7 +101,7 @@ DSH 宿主 Agent ── 基于共享快照回答 / 召回 dsh-mem 经验案例
 - [x] M2-lite 召唤热键快照（39ms）
 - [x] M4 截图 + 本地 OCR + gated 多模态
 - [x] P2-lite 多窗口 pick / focus-input / 新会话热键
-- [x] dsh-mem MVP（案例存取/召回/纠正，13 项断言全绿）
+- [x] dsh-expmem MVP（案例存取/召回/纠正，13 项断言全绿）
 - [ ] 召唤带宽阶梯：按住说话 → 拖拽即问
 - [ ] 异步任务的「进行中形态」（长任务的进度呈现是真空地带）
 - [ ] 收获周报：被动信号度量「真实解决问题」，替代人工验收
@@ -112,16 +112,16 @@ lookover 的终局不是「看得见屏幕的助手」，而是**个人经验型
 
 三层产品承诺：**当下**（理解授权上下文、就地帮助）→ **跨任务**（带回旧经验并核对适用条件）→ **长期**（可查看、可修订的个人经验空间）。最有辨识度的瞬间：助手在新任务里提出「上次用过这个方法，但它依赖一个这次不成立的条件，建议调整」，并展示可核查的依据。
 
-dsh-mem 是这条路线的第一步。完整的产品方向评估（双向论证、对象模型、竞品对比、验证方案、信任风险）见 [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md)。
+dsh-expmem 是这条路线的第一步。完整的产品方向评估（双向论证、对象模型、竞品对比、验证方案、信任风险）见 [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md)。
 
 ## 文档
 
 - [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md) — 个人经验型桌面 AI 助手：产品方向评估（长期愿景）
-- [`docs/product-design-mvp.md`](docs/product-design-mvp.md) — dsh-mem MVP 产品需求与设计方案（PRD）
+- [`docs/product-design-mvp.md`](docs/product-design-mvp.md) — dsh-expmem MVP 产品需求与设计方案（PRD）
 - [`docs/acceptance-M0.md`](docs/acceptance-M0.md) — M0 验收记录（含坏样本迭代过程）
 - [`docs/engineering-handoff-2026-09-20.md`](docs/engineering-handoff-2026-09-20.md) — 工程交接与踩坑记录
 
-各插件的使用与安装说明见各自目录的 README：[`dsh-look/README.md`](dsh-look/README.md) ｜ [`dsh-mem/README.md`](dsh-mem/README.md)
+各插件的使用与安装说明见各自目录的 README：[`dsh-look/README.md`](dsh-look/README.md) ｜ [`dsh-expmem/README.md`](dsh-expmem/README.md)
 
 ## License
 

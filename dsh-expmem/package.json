@@ -1,5 +1,5 @@
 {
-  "name": "dsh-mem",
+  "name": "dsh-expmem",
   "version": "0.1.0",
   "description": "Personal-experience memory plugin for DeepSeek Harness: sourced problem cases, condition-scoped claims, recall into new tasks, corrections that cascade.",
   "type": "module",
@@ -28,9 +28,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mengxiaoxian/lookover.git",
-    "directory": "dsh-mem"
+    "directory": "dsh-expmem"
   },
-  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-mem",
+  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-expmem",
   "author": "mengxiaoxian (程蒙博)",
   "bugs": {
     "url": "https://github.com/mengxiaoxian/lookover/issues"

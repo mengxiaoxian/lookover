@@ -1,4 +1,4 @@
-# dsh-mem — 个人经验记忆插件（Demo）
+# dsh-expmem — 个人经验记忆插件（Demo）
 
 把真实解决过的问题存为**带来源、可纠正、有适用条件**的问题案例，在新任务中召回复用。
 依据《MVP产品需求与设计方案_个人经验型桌面助手_2026-09-21.md》§6/§8，Demo 级实现。
@@ -28,8 +28,8 @@ Demo 数据落在 `demo/data/`（每次运行重置），用模拟 look 快照�
 ## 安装进 profile（与 dsh-look 同法）
 
 `~/.dsh/profiles/desktop`：
-1. `package.json` dependencies 加 `"dsh-mem": "link:~/lookover/dsh-mem"`
-2. `cordis.patch.yml` 末尾 insert `dsh-mem` 插件声明
+1. `package.json` dependencies 加 `"dsh-expmem": "link:~/lookover/dsh-expmem"`
+2. `cordis.patch.yml` 末尾 insert `dsh-expmem` 插件声明
 3. `pnpm install` → **重启 DSH Host**
 
 生产数据目录：`$DSH_HOME/mem`（缺省 `~/.dsh/mem`）；`MEM_DIR` 可覆盖。

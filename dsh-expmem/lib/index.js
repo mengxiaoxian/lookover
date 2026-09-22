@@ -1,4 +1,4 @@
-// dsh-mem — personal-experience memory plugin (host half).
+// dsh-expmem — personal-experience memory plugin (host half).
 //
 // Design: the AGENT is the extractor. This plugin ships four tools
 // (mem_save_case / mem_add_claim / mem_recall / mem_correct) + a bookshelf
@@ -10,14 +10,14 @@
 import { randomUUID } from 'node:crypto'
 import { MemStore, defaultMemDir } from './store.js'
 
-export const name = 'dsh-mem'
+export const name = 'dsh-expmem'
 export const inject = ['tools', 'systemPrompt']
 
 const RECALL_INJECT_LIMIT = 2
 const RECALL_MIN_SCORE = 3 // lexical hits; below this we stay silent (anti-noise)
 
 const PROMPT_TEXT = [
-  '你装配了个人经验记忆（dsh-mem）。它把真实解决过的问题存为「带来源的问题案例」，供以后的任务复用。',
+  '你装配了个人经验记忆（dsh-expmem）。它把真实解决过的问题存为「带来源的问题案例」，供以后的任务复用。',
   '',
   '什么时候保存（mem_save_case）：',
   '- 刚完成一个有复用价值的任务：做过选型比较、排障、方案评审、得出过决策',
@@ -55,7 +55,7 @@ function lastUserText(messages = []) {
 
 const renderRecallBlock = (result) => {
   const lines = [
-    '[dsh-mem 召回的旧经验（隐藏上下文）]',
+    '[dsh-expmem 召回的旧经验（隐藏上下文）]',
     '以下是 lexical 检索命中的历史案例。它们是当时的真实记录，不保证现在仍然适用。',
     '引用时给出适用条件；若本次任务约束与当时不同，明确提示。没有把握就当作参考而非结论。',
   ]
@@ -192,7 +192,7 @@ export function apply(ctx) {
     const decision = await next()
     if (decision.kind === 'reject' || signal.aborted || step !== 1) return decision
     const text = lastUserText(decision.messages)
-    if (!text || text.length < 6 || text.includes('[dsh-mem')) return decision
+    if (!text || text.length < 6 || text.includes('[dsh-expmem')) return decision
     let result
     try { result = await store.recall(text, { limit: RECALL_INJECT_LIMIT }) } catch { return decision }
     if (!result.hits.length) return decision
@@ -210,5 +210,5 @@ export function apply(ctx) {
     }
   }, { prepend: true })
 
-  ctx.effect(() => () => { /* nothing long-running to stop */ }, 'dsh-mem: loaded')
+  ctx.effect(() => () => { /* nothing long-running to stop */ }, 'dsh-expmem: loaded')
 }

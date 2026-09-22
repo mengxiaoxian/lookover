@@ -1,4 +1,4 @@
-// dsh-mem demo — runs the E2–E5 acceptance script WITHOUT the DSH host.
+// dsh-expmem demo — runs the E2–E5 acceptance script WITHOUT the DSH host.
 // Simulates the full pipeline against the real store + a fake look snapshot.
 //
 //   node demo/demo.mjs           (or: npm run demo)
@@ -31,7 +31,7 @@ const snap = { // 模拟 look 快照（ax 档）
   selected: '单机单人场景下 JSONL 足够，索引可以重建',
 }
 const c1 = await store.saveCase({
-  projectName: 'dsh-mem 方案验证',
+  projectName: 'dsh-expmem 方案验证',
   question: '本地记忆存储选型：结构化状态 + 可读内容怎么存',
   constraints: '单机单人，macOS，数据量小（百级案例），索引必须可重建',
   attempts: '考虑过 SQLite、JSONL、图数据库',
@@ -70,7 +70,7 @@ await store.noteReuse(hit.caseId)
 
 // ---- 干扰项：无关案例不应淹没相关案例 ----------------------------------------
 await store.saveCase({
-  projectName: 'dsh-mem 方案验证',
+  projectName: 'dsh-expmem 方案验证',
   question: 'Chrome 无障碍树默认不构建需要手动唤醒',
   attempts: '设 AXManualAccessibility 参数',
   choice: '探测时顺手设置，报错也无妨',
