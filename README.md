@@ -86,8 +86,17 @@ DSH 宿主 Agent ── 基于共享快照回答 / 召回 dsh-mem 经验案例
 - [ ] 异步任务的「进行中形态」（长任务的进度呈现是真空地带）
 - [ ] 收获周报：被动信号度量「真实解决问题」，替代人工验收
 
+## 长期愿景：从「看见」到「记住」
+
+lookover 的终局不是「看得见屏幕的助手」，而是**个人经验型桌面助手**：把共同解决问题的经历沉淀为**带来源、可纠正、有适用条件**的问题案例，让下一次相似任务——少解释一次背景，少重做一次研究，少踩一次已经踩过的坑。
+
+三层产品承诺：**当下**（理解授权上下文、就地帮助）→ **跨任务**（带回旧经验并核对适用条件）→ **长期**（可查看、可修订的个人经验空间）。最有辨识度的瞬间：助手在新任务里提出「上次用过这个方法，但它依赖一个这次不成立的条件，建议调整」，并展示可核查的依据。
+
+dsh-mem 是这条路线的第一步。完整的产品方向评估（双向论证、对象模型、竞品对比、验证方案、信任风险）见 [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md)。
+
 ## 文档
 
+- [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md) — 个人经验型桌面 AI 助手：产品方向评估（长期愿景）
 - [`docs/product-design-mvp.md`](docs/product-design-mvp.md) — dsh-mem MVP 产品需求与设计方案（PRD）
 - [`docs/acceptance-M0.md`](docs/acceptance-M0.md) — M0 验收记录（含坏样本迭代过程）
 - [`docs/engineering-handoff-2026-09-20.md`](docs/engineering-handoff-2026-09-20.md) — 工程交接与踩坑记录
