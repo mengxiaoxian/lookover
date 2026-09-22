@@ -1,0 +1,17 @@
+{
+  "name": "dsh-mem",
+  "version": "0.1.0",
+  "description": "Personal-experience memory plugin for DSH: turns real Q&A tasks into sourced problem cases with condition-scoped claims, recalls them into new tasks, and makes corrections/deletes cascade to recall. Demo grade.",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": ["lib", "cordis.patch.yml", "README.md", "demo"],
+  "license": "MIT",
+  "os": ["darwin"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "demo": "node demo/demo.mjs"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" }
+  }
+}

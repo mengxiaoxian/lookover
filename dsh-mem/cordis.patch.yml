@@ -1,0 +1,4 @@
+# bundle patch: insert dsh-mem into the host composition
+- insert:
+    - id: dsh-mem
+      name: dsh-mem

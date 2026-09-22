@@ -1,0 +1,4 @@
+# bundle patch: insert dsh-look into the host composition
+- insert:
+    - id: dsh-look
+      name: dsh-look
