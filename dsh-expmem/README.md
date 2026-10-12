@@ -1,49 +1,52 @@
-# dsh-expmem — 个人经验记忆插件（Demo）
+# dsh-expmem · 把解决经验留给下一次
 
-把真实解决过的问题存为**带来源、可纠正、有适用条件**的问题案例，在新任务中召回复用。
-依据《MVP产品需求与设计方案_个人经验型桌面助手_2026-09-21.md》§6/§8，Demo 级实现。
+**保存问题、解决做法、来源与适用条件，下次相似任务可检索复用；过时或不准确的经验可以纠正、失效或删除。**
 
-**设计核心：agent 本身就是抽取器。** 插件不另起 LLM 管线，只提供工具 + 系统提示 + pre-step 注入，
-由宿主 agent 在对话中完成案例结构化（省一次调用，且结构化质量随宿主模型升级）。
+属于 [lookover 桌面助手组合](../README.md)：[dsh-bubble](../dsh-bubble/) 提供工作页面旁的入口，[dsh-look](../dsh-look/) 提供现场上下文，本插件保留可复用经验。也可单独使用，来源来自粘贴文本或文件。
 
-## 能力 ↔ PRD 验收映射
+## 第一次怎么用
 
-| PRD 能力 | 实现 | Demo 验证 |
-|---|---|---|
-| C2 带来源案例 | `mem_save_case`（outcomeStatus 强制 honest，unknown 不许写结果注记） | E2a–E2d ✓ |
-| C3 经验候选 | `mem_add_claim`（必带 conditions；同文去重升版本） | E2c ✓ |
-| C4 召回 | `mem_recall` 工具 + **pre-step 隐藏注入**（复用 dsh-look 快照同款注入模式，top1 词元命中 ≥3 才注入，防噪） | E3a–E3e ✓ |
-| C5 纠正生效 | `mem_correct`（ignore/invalidate/delete/revive；delete 级联关联 Claim） | E4a–E4c ✓ |
-| C6 书架 | `mem_list` + 每案例 Markdown 导出（`cases/<id>.md`） | E5 ✓ |
-| C1 就地回答 | 由 dsh-look + 宿主气泡承担，不在本插件范围 | — |
+任务解决并确认结果后说：
 
-## 运行 Demo（无需 DSH Host）
+> 把这次问题、尝试过的办法、最后的解决方法、来源和适用条件保存为经验。没有确认的结果标为未知。
 
-```bash
-npm run demo    # 13 项断言全绿即 E2–E5 通路 OK
+下次遇到相似任务说：
+
+> 先检索之前关于这个问题的经验，说明当时的适用条件，再判断这次能不能复用。
+
+也可要求“列出已保存的经验”“这条经验已不适用，标记失效”或“删除这个案例及关联经验”。Agent 调用后获得案例 ID，可按 ID 定位；口头要求不等于已执行，应查看工具结果。
+
+## 保存与复用
+
+| 工具 | 用途 |
+| --- | --- |
+| `mem_save_case` | 保存问题、约束、尝试、选择、理由、结果状态与来源，导出可读卡片 |
+| `mem_add_claim` | 补充结论和适用条件；未确认时标为推断或待定 |
+| `mem_recall` | 检索旧案例，返回来源、条件和相关理由 |
+| `mem_correct` | 忽略、失效、删除或恢复；删除案例级联关联经验 |
+| `mem_list` | 列出已保存案例 |
+
+插件提供工具与系统提示，由宿主 Agent 结构化信息，不另起模型服务。第一步前的词元召回达到阈值时会提供旧案例；命中和正确引用都不保证，明确请求检索更容易核对。
+
+## 安装与数据
+
+`0.1.1` 的宿主声明为官方 DeepSeek Harness `0.2.0-rc.2`；组合验证范围为 macOS arm64。关闭 DSH 后安装，再打开：
+
+```sh
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-expmem-0.1.1.tgz
 ```
 
-Demo 数据落在 `demo/data/`（每次运行重置），用模拟 look 快照做来源。
+无 `dsh` 命令时见[官方内置 CLI 用法](../README.md#下载与安装)。
 
-## 安装进 profile（与 dsh-look 同法）
+数据默认在 `$DSH_HOME/mem`（未设置时 `~/.dsh/mem`），`MEM_DIR` 可指定独立目录。结构化记录为 JSONL（逐行 JSON），可读卡片在 `cases/<id>.md`。卸载不自动清空数据，无云端同步；Agent 引用召回内容时，云端模型仍可能收到相关文本。
 
-`~/.dsh/profiles/desktop`：
-1. `package.json` dependencies 加 `"dsh-expmem": "link:~/lookover/dsh-expmem"`
-2. `cordis.patch.yml` 末尾 insert `dsh-expmem` 插件声明
-3. `pnpm install` → **重启 DSH Host**
+## 当前限制
 
-生产数据目录：`$DSH_HOME/mem`（缺省 `~/.dsh/mem`）；`MEM_DIR` 可覆盖。
+- 词元打分而非向量语义检索，同义改写可能漏召回。
+- 相同结论只做同文去重，自动召回阈值仍需校准。
+- 单用户、单进程写入假设，没有并发写锁。
+- 复用次数包含自动注入，不等于实际采纳次数。
+- 删除更新当前索引和案例卡，追加日志保留历史；不是安全擦除。彻底清除敏感内容需要处理存储目录和备份。
+- 存储与工具验证使用模拟资料，不代表任意应用的全自动保存与召回已验收。
 
-## 存储（PRD §8.2）
-
-- `projects.jsonl` / `cases.jsonl` / `claims.jsonl` / `events.jsonl`（append-only 留痕）+ `state.json`（ignore 表）
-- `cases/<id>.md`：人读案例卡（frontmatter = 结构化字段）
-- **索引在内存中重建**，存储文件是唯一事实源；删除级联到索引与 Markdown
-
-## 已知限制（Demo 级，README 即欠条）
-
-1. **召回是词元打分**（拉丁词 + CJK 二元组）：改写同义查询会漏（Demo 中「Chrome 选中文本读不到」未能召回 AX 案例，即同义改写 miss 的实例）。接宿主后可让 agent 先 `mem_recall` 自己的改写；向量索引留 M-mem-3 之后；
-2. 相似 Claim 去重是同文精确匹配，语义去重未做；
-3. pre-step 注入的防噪阈值（词元 ≥3）是拍的，需真实使用校准；
-4. 并发写未加锁（单用户单进程假设）；
-5. `reuseCount` 目前把 pre-step 注入也算复用，高估——有效复用判定（PRD §10）待埋点细化。
+`npm run demo` 在包内 `demo/data` 创建模拟资料，运行前清空该模拟目录，不接触日常经验目录。早期需求与实验见 `../docs/`，不作为新增能力承诺。

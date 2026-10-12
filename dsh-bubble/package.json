@@ -1,0 +1,71 @@
+{
+  "name": "dsh-bubble",
+  "version": "0.3.4",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "bin",
+    "native",
+    "skins",
+    "docs/SKIN-CONTRACT.md",
+    "README.md",
+    "LICENSE",
+    "cordis.patch.yml",
+    "scripts/build.mjs"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-workspace",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "external": [
+        "react"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js"
+  },
+  "description": "macOS 悬浮对话气泡：在当前工作页面旁提问，与 DSH 主窗口继续同一会话。搭配 dsh-look 读取上下文、dsh-expmem 复用解决经验。",
+  "license": "MIT",
+  "author": "mengxiaoxian",
+  "engines": {
+    "node": ">=20",
+    "dsh": "0.2.0-rc.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mengxiaoxian/lookover.git",
+    "directory": "dsh-bubble"
+  },
+  "homepage": "https://github.com/mengxiaoxian/lookover/tree/main/dsh-bubble",
+  "bugs": {
+    "url": "https://github.com/mengxiaoxian/lookover/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "lookover",
+    "macos",
+    "bubble",
+    "desktop-assistant"
+  ]
+}

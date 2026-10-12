@@ -1,132 +1,71 @@
-# lookover
+# lookover · 在当前页面提问，把解决经验留给下次
 
-> **不离场、随叫随到、和你看着同一块屏幕的通用桌面助手。**
+你正在读文档、看网页或排查报错，问题就出现在眼前。三个可独立安装的 DSH 插件组合起来：**气泡让你少切页面，Look 让你少贴背景，经验记忆让你少重复解释。**
 
-名字来自它的核心交互：你按一下、说一句，它就**凑过来看一眼**你在看什么——而不是把你拽到它那里去。
+| 插件 | 解决的摩擦 | 与其他插件怎么配合 |
+| --- | --- | --- |
+| [dsh-bubble · 悬浮对话](dsh-bubble/) | 为问一句话切到完整聊天窗口 | 在工作页面旁提问、查看回复；需要设置或授权时回到 DSH 主窗口 |
+| [dsh-look · 页面上下文](dsh-look/) | 每次都复制文字、描述页面或上传截图 | 在问题依赖屏幕内容时按需读取窗口，给气泡对话提供真实上下文 |
+| [dsh-expmem · 解决经验](dsh-expmem/) | 下次遇到相似问题又从头解释 | 保存问题、做法、来源和适用条件，供后续检索、纠正或删除 |
 
-基于 [DeepSeek Harness](https://github.com/deepseek-ai)（DSH）插件体系构建的 macOS 桌面 Agent 助手，由两个可独立使用的插件组成：
+建议先装 **气泡 + Look**，体验当前页面旁的问答；有值得复用的经验后，再加入经验记忆。三个插件都能独立使用，不会互相强制安装。
 
-| 模块 | 是什么 | 一句话 |
-|---|---|---|
-| [`dsh-look/`](dsh-look/) | 场景感知探针 | 让 Agent 在被问到「这个/这个报错/这个页面」时，能真实读到你的屏幕上下文 |
-| [`dsh-expmem/`](dsh-expmem/) | 个人经验记忆 | 把解决过的问题存为带来源、可纠正的案例，下次相似任务直接召回 |
+## 第一次可以这样试
 
----
+1. 在浏览器或编辑器中把目标页面放到最前，选中想问的文字。
+2. 点开气泡，输入：**“请用 look 看一下浏览器里这段选中文字，帮我解释。”**
+3. 回复出现在气泡里。能读到多少取决于权限和目标应用；读不到时应明确告知，你也可以直接粘贴文字。
+4. 问题解决并确认结果后，说：**“把这次问题、解决方法和适用条件保存为经验，只记录已经确认的结果。”**
+5. 下次遇到相似问题，说：**“先检索之前相关的经验，再判断这次是否适用。”** 本次约束变了，就需要重新判断。
 
-## Quick Start
+这是推荐的组合流程。读取、保存、召回依赖宿主 Agent 正确调用工具；不是自动操作其他应用或全自动长期记忆。模型和其他工具仍由 DSH 提供。
 
-前置：macOS 12+、Node ≥ 20、已安装 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（桌面端或 `dsh web`）。
+## 下载与安装
 
-**方式一：插件市场（推荐）** — DSH 里打开 设置 → 插件市场（[dshmarket](https://dshmarket.com)），搜索 `dsh-look` / `dsh-expmem`，一键安装。
+本轮预构建包见 [GitHub Releases](https://github.com/mengxiaoxian/lookover/releases/tag/lookover-2026.10.12)：`dsh-bubble@0.3.4`、`dsh-look@0.1.1`、`dsh-expmem@0.1.1`，无需本机编译 Swift。
 
-**方式二：命令行**
+**当前组合目标：macOS Apple Silicon（arm64）＋官方 DeepSeek Harness 0.2.0-rc.2 桌面版。** 其他系统、Intel Mac 和后续宿主版本尚未完成这套组合的验收；包内声明此次宿主版本。
+
+关闭 DSH 后，在终端运行，再正常打开官方应用：
 
 ```sh
-dsh plugin --profile <你的profile> add dsh-look dsh-expmem
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-bubble-0.3.4.tgz
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-look-0.1.1.tgz
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-expmem-0.1.1.tgz
 ```
 
-**方式三：本地开发** — clone 本仓库，按 [`dsh-look/README.md`](dsh-look/README.md) / [`dsh-expmem/README.md`](dsh-expmem/README.md) 的 profile 配置安装。
+没有 `dsh` 命令时，把命令开头的 `dsh` 替换为官方内置 CLI：
 
-**权限与适配：**
-- 零权限即可用（app 档）；授予「辅助功能」解锁窗口标题/选中文本（ax 档），授予「屏幕录制」解锁 OCR（ocr 档）
-- 使用社区发行版 DSH 桌面端（非「小光」构建）时，设置环境变量 `DSH_SELF_BUNDLE=<你的桌面端bundleId>` 以正确过滤自窗口
-- npm 包内置 arm64 / x64 预编译 helper，无需本地构建；从源码构建用 `npm run build:native`
-- 不装宿主也能体验 dsh-expmem 核心逻辑：`cd dsh-expmem && npm run demo`
-
-## 解决什么问题
-
-用 AI 助手时最大的摩擦不是「问不出答案」，而是**每换一个任务就要重新解释一遍背景**：
-
-- 你在浏览器看一份英文合同，想问第 7 条的风险——得先复制粘贴给 AI；
-- 终端弹了个报错——得截图上传；
-- 微信里对方说了句话——得手动转述。
-
-用户指代屏幕内容（「这个」「他刚说的」）时，AI 是盲的。**lookover 让 Agent 获得一次诚实、克制、留痕的「看」。**
-
-## 产品原则
-
-1. **拉模型，零轮询**——只在 agent 调用 `look` 工具那一刻读一次最前面的非自身窗口。无轮询、无跟踪、无注入，每次读取落盘留痕（`~/.dsh/look/log.jsonl`）。
-2. **优雅降级**——零权限也能用（app/bundleId/bounds），授予权限获得更多（窗口标题、文档 URL、选中文本、焦点元素），OCR 是最后一层兜底。
-3. **答案出现在注意力所在处**——召唤即捕获：按下热键的瞬间快照（此刻焦点未丢、选区最完整），答案就地交付，全程不离开当前工作页面。
-4. **诚实边界**——读不到就说读不到，禁止翻历史/读标签页/猜 URL 变相编造屏幕内容；这条边界是验收用例喂出来的（见下）。
-
-## 架构
-
-```
-任何 App（Chrome / 微信 / 终端 / WPS / IDE …）
-   │  ⌥⌘Z 召唤（listen-only CGEventTap，不拦截）
-   ▼
-dsh-look 探针 ── 按下瞬间抓一次快照（热快照 39ms）
-   ├─ app 档（零 TCC 权限）: app / bundleId / pid / windowId / bounds
-   ├─ ax 档（辅助功能权限）: + 窗口标题 / 文档 URL / 选中文本 / 焦点元素
-   └─ ocr 档（录屏权限）:   + 截图 → macOS Vision 本地 OCR（零 token）
-   ▼  agent/pre-step 隐藏注入（TTL 5min，防噪）
-DSH 宿主 Agent ── 基于共享快照回答 / 召回 dsh-expmem 经验案例
-   ▼
-答案交付在气泡（锚定注意力位置，不改前台 App）
+```sh
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh"
 ```
 
-多窗口场景：≥2 个可见候选窗时返回 `windows` 列表，`look({pick:"微信"})` 按名称选窗——你指哪个它看哪个。
+只想体验一个插件，就只执行对应命令。插件市场收录需维护者合并目录更新，提交成功不代表已经上架。npm 现有 Look、经验插件 0.1.0 是旧发布，此次以 GitHub 的明确版本包为准。
 
-## 验收数据（真实测试，非宣称）
+已装本地 `dsh-xiaoguang-companion-proof` 的用户，请先停用旧气泡插件，再装 `dsh-bubble`，避免双开；无需删除会话历史。新用户直接安装。
 
-- **A2「该看就看」命中率 11/11 = 100%**：微信×2、Chrome×4、终端、WPS×2、ima.copilot×3，含 1 例「识别命中、执行越权」坏样本，加边界约束后复测通过
-- **A3「不该看就不看」0/5 次调用**：无关问题期间留痕日志零增长
-- 热快照 **39ms**；冷 Chrome ~1s（延迟被「展开+打字」掩盖）；空闲开销 ≈ 0
-- 完整记录见 [`docs/acceptance-M0.md`](docs/acceptance-M0.md)
+## 权限与边界
 
-## 关键工程决策（为什么不好抄）
+- 气泡本身不读取屏幕，不要求辅助功能或屏幕录制权限。工具授权、附件、模型设置和复杂内容仍回主窗口处理。
+- Look 无权限时只有应用与窗口基本信息；“辅助功能”权限用于标题、选区等应用暴露的文本；“屏幕录制”用于按需截图及本地 OCR（文字识别）。按实际需要在系统设置中授权给对应 DSH 应用。
+- 本版通过点击气泡使用，不提供旧小光壳的召唤热键，不承诺按键瞬间保存选区。选区可能因失焦消失，失败时可粘贴文本。
+- Look 按需读取，不持续监视。OCR 在本机完成，但读取结果提供给当前 Agent；使用云端模型时，相关上下文随对话发送给所选模型。读取日志在 `~/.dsh/look/log.jsonl`，可能包含窗口文本。
+- 经验默认存于 `$DSH_HOME/mem`（未设置时为 `~/.dsh/mem`），没有云端同步。词元检索可能漏掉同义改写，不适合多进程共写一个目录。删除当前案例不等于安全擦除追加日志。
+- 原生助手带本地临时签名，尚无 Apple 开发者签名与公证；跨机器首次启动是否被系统拦截仍需验证。
 
-| 决策 | 被否掉的备选 | 理由 |
-|---|---|---|
-| 全局热键用 CGEventTap | Carbon RegisterEventHotKey | Carbon 在现代 macOS 后台 CLI 注册成功但**永不派发**（成品二进制同样踩坑）；listen-only 不拦截，与 App 自有热键搭便车共存 |
-| 快照在「按下瞬间」抓 | 唤起后再读 | 唤起 App 瞬间焦点即丢、选区被破坏——时序设计是「召唤即捕获」的根基 |
-| Chromium AX 树手动唤醒 | 直接读 | Chromium 默认不构建无障碍树；`AXManualAccessibility` 唤醒 + 失败歇 0.6s 重扫；Blink 选区需 `AXSelectedTextMarkerRange` 参数化取值并滤 `￼` 占位符 |
-| OCR 用 macOS Vision 本地跑 | 云端多模态 | 零 token、零上传；gated——仅视觉语义问题才把图喂多模态模型 |
-| 记忆插件不另起 LLM 管线 | 独立抽取服务 | **agent 本身就是抽取器**：只提供工具+系统提示+注入，结构化质量随宿主模型免费升级 |
+## 气泡预览
 
-完整踩坑记录：[`docs/engineering-handoff-2026-09-20.md`](docs/engineering-handoff-2026-09-20.md)
+![默认悬浮对话](dsh-bubble/screenshots/ui-plain.png)
+![小光外观](dsh-bubble/screenshots/ui-xiaoguang.png)
 
-## 当前边界（诚实清单）
+外观切换不改变会话或任务。截图来自独立验收对话。
 
-- v1 聚焦**只读辅助**：读你所读、答你所问；动作执行（代点、代发）后置
-- 记忆召回是词元打分（CJK 二元组），同义改写会漏；向量索引在路线图上
-- 副屏 / 跨 Space 窗口未覆盖；气泡收起时 AX 树不可达（自动展开后操作在做）
-- 依赖 DSH 宿主运行环境，不是独立 App
+## 开发与验证
 
-## 路线图
+- [气泡使用与开发说明](dsh-bubble/README.md)
+- [Look 使用说明](dsh-look/README.md)
+- [经验记忆使用说明](dsh-expmem/README.md)
+- [本轮发布与验证范围](docs/release-2026-10-12.md)
+- [早期验收](docs/acceptance-M0.md)与[工程记录](docs/engineering-handoff-2026-09-20.md)保留原日期，其中旧壳的热键、语音和原型能力不等于此次发行承诺。
 
-- [x] M0 零权限 look 工具（验收 11/11）
-- [x] M3 辅助功能层（选中文本三级读取）
-- [x] M2-lite 召唤热键快照（39ms）
-- [x] M4 截图 + 本地 OCR + gated 多模态
-- [x] P2-lite 多窗口 pick / focus-input / 新会话热键
-- [x] dsh-expmem MVP（案例存取/召回/纠正，13 项断言全绿）
-- [ ] 召唤带宽阶梯：按住说话 → 拖拽即问
-- [ ] 异步任务的「进行中形态」（长任务的进度呈现是真空地带）
-- [ ] 收获周报：被动信号度量「真实解决问题」，替代人工验收
-
-## 长期愿景：从「看见」到「记住」
-
-lookover 的终局不是「看得见屏幕的助手」，而是**个人经验型桌面助手**：把共同解决问题的经历沉淀为**带来源、可纠正、有适用条件**的问题案例，让下一次相似任务——少解释一次背景，少重做一次研究，少踩一次已经踩过的坑。
-
-三层产品承诺：**当下**（理解授权上下文、就地帮助）→ **跨任务**（带回旧经验并核对适用条件）→ **长期**（可查看、可修订的个人经验空间）。最有辨识度的瞬间：助手在新任务里提出「上次用过这个方法，但它依赖一个这次不成立的条件，建议调整」，并展示可核查的依据。
-
-dsh-expmem 是这条路线的第一步。完整的产品方向评估（双向论证、对象模型、竞品对比、验证方案、信任风险）见 [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md)。
-
-## 文档
-
-- [`docs/product-direction-evaluation.md`](docs/product-direction-evaluation.md) — 个人经验型桌面 AI 助手：产品方向评估（长期愿景）
-- [`docs/product-design-mvp.md`](docs/product-design-mvp.md) — dsh-expmem MVP 产品需求与设计方案（PRD）
-- [`docs/acceptance-M0.md`](docs/acceptance-M0.md) — M0 验收记录（含坏样本迭代过程）
-- [`docs/engineering-handoff-2026-09-20.md`](docs/engineering-handoff-2026-09-20.md) — 工程交接与踩坑记录
-
-各插件的使用与安装说明见各自目录的 README：[`dsh-look/README.md`](dsh-look/README.md) ｜ [`dsh-expmem/README.md`](dsh-expmem/README.md)
-
-## License
-
-MIT
-
-## 作者
-
-程蒙博（[mengxiaoxian](https://github.com/mengxiaoxian)）· AI Agent 产品经理。产品设计与工程实现均为独立完成。
+MIT License。基于 DeepSeek Harness 插件机制，由社区作者维护。

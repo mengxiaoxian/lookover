@@ -1,97 +1,49 @@
-# dsh-look — M0 + M3 + M2-lite + M4 + P2-lite(多窗口/pick) 场景感知探针
+# dsh-look · 让 DSH 知道你正在问什么
 
-拉模型（零感知）：只在 agent 调用 `look` 工具时读一次「最前面的非自身窗口」。
-无轮询、无跟踪、无注入。两档保真度，无权限时优雅降级：
+**遇到“这个页面、这段文字、这个报错”，按需读取当前窗口上下文，减少复制粘贴。**
 
-- **app 档（零 TCC 权限）**：app / bundleId / pid / windowId / bounds / layer
-- **ax 档（辅助功能权限）**：+ 窗口标题、文档 URL、**选中文本**、焦点元素文本
+属于 [lookover 桌面助手组合](../README.md)：搭配 [dsh-bubble](../dsh-bubble/) 在工作页面旁提问，再用 [dsh-expmem](../dsh-expmem/) 保存值得复用的经验。Look 也能单独在 DSH 主窗口使用。
 
-## M2-lite：全局召唤热键（Ctrl+Alt+L）
+## 如何用
 
-在任何 app 里按下热键：
+把目标页面放到最前、选中文字，向 Agent 说：
 
-1. watcher helper（Carbon 全局热键，常驻，host 崩溃自动重启）通知 host
-2. host **立刻**跑一次 look 快照——此刻目标 app 仍在前台，焦点未丢、选区最完整
-3. helper activate-self 把 DSH 唤到前台，输入框就绪
-4. 下一条消息发出时，快照作为隐藏上下文注入（`agent/pre-step`，TTL 5 分钟）
+> 请用 look 读取浏览器里的选中文字，解释这一段。
 
-热键参数在 `lib/index.js` 顶部 `HOTKEY_ARGS`（key code 37 = L，modifiers 0x1800 = Ctrl+Alt）。
-留痕日志以 `source: "hotkey"` 区分热键快照与 agent 主动调用。
+文字无法通过辅助功能读取且你愿意读取画面时，可以说：
 
-## P1-lite：语音路径定案（2026-09-21）
+> 请用 look 的 OCR 看一下当前报错窗口，先说清楚读到了什么，再帮我排查。
 
-**买不造**：ASR 是商品化能力，本地离线模型（sherpa zipformer）中文准确率不如云端。定案：
+模型根据问题调用 `look`；多窗口选错时可指定应用或窗口名，如 `look({pick:"浏览器"})`。OCR 通过 `look({ocr:true})` 按需启用。本插件只读上下文，不负责点击、输入或编辑其他应用。
 
-- **主力**：豆包输入法语音（系统级，任何输入框可用）——`⌥⌘Z`（召唤+快照）→ 豆包语音键说话 → 文字落 DSH 输入框 → 发送时快照自动注入；
-- **兜底**：dsh-voice 本地引擎（`engine: native`，离线隐私）保持不动，断网/不便切输入法时用 ctrl+alt+v。
+## 读得到什么
 
-## P2-lite：召唤体验补全（2026-09-21，focus-input + ⌃⌥⌘N）
+| 权限 | 内容 | 边界 |
+| --- | --- | --- |
+| 无额外权限 | 应用名、窗口位置大小等基本信息 | 不能声称看到页面正文 |
+| 辅助功能 | 应用暴露的标题、文档地址、选中文字、焦点文本 | 部分应用不暴露内容，失焦可能丢选区 |
+| 屏幕录制且请求 OCR | 当前窗口截图、本地 macOS Vision 文字识别 | 可能截图失败或识别错误 |
 
-- **focus-input**：⌥⌘Z 召唤后 ~400ms，helper 在 DSH 窗口 AX 树里 BFS 找输入框并聚焦（重试 2.5s），
-  免手动点选；气泡收起时静默无操作。
-- **⌃⌥⌘N 新会话**：app UI 没有新会话快捷键；helper `new-session` AXPress 侧边栏「新建会话」按钮
-  （`--dry` 只探测不按）。加 Control 是因为 tap 只听不拦，⌥⌘N 会与浏览器无痕窗口双触发。
-- 现状限制：气泡收起时输入框/侧栏按钮都不在 AX 树里，两者静默无操作；「自动展开后再操作」留待后续。
+读取结果提供给当前 Agent；本地 OCR 不等于所有上下文永不离开本机。云端模型会收到提供给它的文本。视觉问题如需读图，还需宿主和模型支持相应能力。
 
-## P2-lite：多窗口与 pick（2026-09-21 交付）
+不持续监视。每次读取在 `~/.dsh/look/log.jsonl` 留痕，可能包含所读文本；临时截图 10 分钟过期，按后续调用清理，不是后台定时清理。
 
-微信等应用点开聊天是**独立窗口**，最前窗口可能不是用户所指。现在：
+## 安装
 
-- 存在 ≥2 个可见候选窗时，结果附 `windows` 列表（app / 窗口名 / bounds / selected 标记）；
-- `look({pick:"微信"})` 按应用名或窗口名子串（不区分大小写）选窗，匹配不到返回
-  `pick_no_match` + 候选列表；缺省仍是「最前窗口」（M0 语义不变）；
-- 常见用法：`look({ocr:true, pick:"微信"})` 直接对聊天窗口 OCR；
-- 窗口名来自 `kCGWindowName`（依赖屏幕录制权限；无权限时仅应用名匹配可用）。
-- 实测：6 候选窗枚举 + pick 选 ChatGPT + `--pick 微信 --ocr` 读出微信主窗口会话列表。
+`0.1.1` 面向 macOS arm64、官方 DeepSeek Harness `0.2.0-rc.2`。关闭 DSH 后安装，再打开：
 
-## M4：截图 + 本地 OCR + gated 多模态（2026-09-21 交付，同日真实使用验证 ✅）
+```sh
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-look-0.1.1.tgz
+```
 
-`look({ocr:true})` 对同一窗口补一层 OCR：
+无 `dsh` 命令时见[官方内置 CLI 用法](../README.md#下载与安装)。
 
-> **验收实录**：微信主窗口（win 497），纯文本模型读出左栏列表+右栏文字气泡；
-> 读图模型走 `imagePath` 描述出照片内容（「一张女性微笑的照片」——OCR 只能给「［图片］」）；
-> 诚实边界生效（未读消息不在视野则明说不猜）。图文双通道 + 门控 + 边界全部按设计工作。
+## 当前边界
 
-1. **截图**：`screencapture -x -l<winId>`（CGWindowListCreateImage 在 macOS 15 SDK 已废弃）。
-   **需要屏幕录制权限**（系统设置 → 隐私与安全性 → 屏幕录制 → DSH）；缺失时返回
-   `ocr.error=capture_failed` 与引导文案，AX 档结果不受影响。
-2. **本地 OCR**：macOS Vision（accurate + 语言校正，zh-Hans + en-US），零 token。
-   覆盖 AX 盲区：微信/QQ 聊天气泡、图片文字、扫描 PDF、视频画面。
-3. **gated 多模态**：PNG 落在 `$TMPDIR/dsh-look/`（10 分钟 TTL，调用时自动清理过期文件），
-   路径随 `ocr.imagePath` 返回。默认只用 OCR 文本；只有问题确实是视觉语义类
-   （图表趋势/颜色/布局）时，agent 才用 `read_image` 读图——按需付费，不是每次都喂图。
-4. 系统提示已更新门控规则：OCR 结果引用时注明「据 OCR 识别」，capture_failed 时如实告知。
+- 自动排除官方 DSH 与气泡窗口；其他桌面壳未在本轮验收。
+- 官方版通过 Agent 调用 `look`；旧壳的 ⌥⌘Z／新会话热键和按键快照尚未迁移。
+- 选区读取取决于应用和权限；首次体验建议明确请求 `look`，信息不足时粘贴文本。
+- 本版不发布工作区里的 `operate` 草稿，不附带其他应用的操作能力。
+- 官方工具注册及 schema（数据格式）校验已有验证；不等于各种应用的正文、选区、OCR 端到端验收。
 
-## M3 要点（选中文本读取）
-
-1. **焦点元素路径**：目标 app 的 `kAXSelectedText`（原生编辑器，失焦后多数仍可读）
-2. **窗口扫描路径**：失焦导致焦点元素为空时，对窗口元素树做有界 BFS
-   （≤1500 元素 / 2s 墙钟，失败停 0.6s 重扫一次）
-3. **Chromium 特殊处理**：
-   - 渲染进程 AX 树默认不构建——设 `AXManualAccessibility` / `AXEnhancedUserInterface` 唤醒（报错也无妨，探测本身就能触发）
-   - 网页正文选区不走 `AXSelectedText`，走 `AXSelectedTextMarkerRange` → `AXStringForTextMarkerRange` 参数化取值
-   - 滤除 marker 文本中的 `￼`/私用区占位符
-4. **能力边界（实测）**：TextEdit 等原生编辑器 ✅、Chrome 正文 ✅、微信聊天气泡 ❌（app 不暴露，留待截图/OCR）
-
-- `native/look.swift` — Swift helper：`CGWindowListCopyWindowInfo(.optionOnScreenOnly)`
-  天然前到后排序，按 bundleId/pid 跳过 DSH 自己的窗口，取第一个 layer 0 窗口。
-- `lib/index.js` — host 半：spawn helper、解析 JSON、注册 `look` 工具、
-  写入系统提示指引、留痕到 `~/.dsh/look/log.jsonl`。
-- 编译：`npm run build:native`（注意 `-module-cache-path`，沙箱下必须）。
-
-## 安装（已完成的步骤）
-
-profile `~/.dsh/profiles/desktop`：
-1. `package.json` dependencies 加 `"dsh-look": "file:~/lookover/dsh-look"`
-2. `cordis.patch.yml` 末尾 insert `dsh-look` 插件声明
-3. `pnpm install`
-4. **重启 DSH Host**（否则 `look` 工具不出现）
-
-## 留痕日志
-
-每次 agent 调用 `look` 追加一行 JSON 到 `~/.dsh/look/log.jsonl`
-（含 error 结果）。日志无新增 = 没有调用，即 A3 的判据。
-
-## 验收
-
-见 `../ACCEPTANCE-M0.md`。
+`lib/index.js` 注册工具与提示，`native/look.swift` 读取窗口，包内附 arm64 helper。源码构建用 `npm run build:native`，需要 Swift 编译工具。插件不自动授予系统权限。

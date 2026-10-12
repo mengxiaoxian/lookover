@@ -1,21 +1,23 @@
 {
   "name": "dsh-expmem",
-  "version": "0.1.0",
-  "description": "Personal-experience memory plugin for DeepSeek Harness: sourced problem cases, condition-scoped claims, recall into new tasks, corrections that cascade.",
+  "version": "0.1.1",
+  "description": "个人解决经验记忆：保存问题、做法、来源和适用条件，下次相似任务可检索复用，并支持纠正与删除。搭配 dsh-bubble 提问、dsh-look 提供现场上下文。",
   "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib",
     "cordis.patch.yml",
     "README.md",
-    "demo"
+    "LICENSE",
+    "demo/demo.mjs"
   ],
   "license": "MIT",
   "os": [
     "darwin"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": "0.2.0-rc.2"
   },
   "scripts": {
     "demo": "node demo/demo.mjs"
@@ -30,7 +32,7 @@
     "url": "git+https://github.com/mengxiaoxian/lookover.git",
     "directory": "dsh-expmem"
   },
-  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-expmem",
+  "homepage": "https://github.com/mengxiaoxian/lookover/tree/main/dsh-expmem",
   "author": "mengxiaoxian (程蒙博)",
   "bugs": {
     "url": "https://github.com/mengxiaoxian/lookover/issues"
@@ -41,6 +43,8 @@
     "agent",
     "memory",
     "experience",
-    "recall"
+    "recall",
+    "dsh-plugin",
+    "lookover"
   ]
 }

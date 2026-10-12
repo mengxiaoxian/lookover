@@ -1,7 +1,7 @@
 {
   "name": "dsh-look",
-  "version": "0.1.0",
-  "description": "Scene-awareness probe for DeepSeek Harness: a privacy-first `look` tool that reads the frontmost non-self window (app / AX / local OCR) on macOS, plus summon-hotkey snapshot capture.",
+  "version": "0.1.1",
+  "description": "macOS 按需读取窗口上下文：让 DSH 理解“这个页面、这段选中文字、这个报错”，减少复制粘贴。搭配 dsh-bubble 就地提问、dsh-expmem 复用经验。",
   "type": "module",
   "main": "lib/index.js",
   "files": [
@@ -9,14 +9,16 @@
     "bin",
     "native",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "license": "MIT",
   "os": [
     "darwin"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": "0.2.0-rc.2"
   },
   "scripts": {
     "build:native": "mkdir -p bin && swiftc -O -module-cache-path ./build/mc native/look.swift -o bin/look"
@@ -31,7 +33,7 @@
     "url": "git+https://github.com/mengxiaoxian/lookover.git",
     "directory": "dsh-look"
   },
-  "homepage": "https://github.com/mengxiaoxian/lookover#dsh-look",
+  "homepage": "https://github.com/mengxiaoxian/lookover/tree/main/dsh-look",
   "author": "mengxiaoxian (程蒙博)",
   "bugs": {
     "url": "https://github.com/mengxiaoxian/lookover/issues"
@@ -43,6 +45,11 @@
     "accessibility",
     "ocr",
     "agent",
-    "context-aware"
+    "context-aware",
+    "dsh-plugin",
+    "lookover"
+  ],
+  "cpu": [
+    "arm64"
   ]
 }

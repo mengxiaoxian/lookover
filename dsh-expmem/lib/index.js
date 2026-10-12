@@ -39,7 +39,9 @@ const PROMPT_TEXT = [
 ].join('\n')
 
 const render = (value) => [{ type: 'text', text: JSON.stringify(value, null, 2) }]
-const objSchema = { type: 'object', additionalProperties: false, properties: {} }
+// The official runtime validates returned values against this schema.
+// Store records contain evolving fields, so admit their actual JSON properties.
+const objSchema = { type: 'object', additionalProperties: true }
 
 function lastUserText(messages = []) {
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -182,7 +184,7 @@ export function apply(ctx) {
       type: 'object', additionalProperties: false,
       properties: { projectId: { type: 'string' } },
     },
-    output: { schema: objSchema, render: (_a, v) => render(v) },
+    output: { schema: { type: 'array', items: objSchema }, render: (_a, v) => render(v) },
     isConcurrencySafe: () => true,
     async execute(args) { return await store.list(args ?? {}) },
   })

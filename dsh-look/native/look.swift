@@ -28,6 +28,7 @@ import Vision
 
 var selfBundle: String? = nil
 var selfPid: Int = -1
+var excludedBundles = Set<String>()
 var maxChars = 4000
 var ocrRequested = false
 var pickText: String? = nil
@@ -41,6 +42,7 @@ let command = args.first?.hasPrefix("--") == false ? args.removeFirst() : ""
 while !args.isEmpty {
     let a = args.removeFirst()
     if a == "--self-bundle", let v = args.first { selfBundle = v; args.removeFirst() }
+    else if a == "--exclude-bundle", let v = args.first { excludedBundles.insert(v); args.removeFirst() }
     else if a == "--self-pid", let v = args.first, let p = Int(v) { selfPid = p; args.removeFirst() }
     else if a == "--max-chars", let v = args.first, let n = Int(v) { maxChars = max(0, n); args.removeFirst() }
     else if a == "--key-code", let v = args.first, let n = UInt32(v) { keyCode = n; args.removeFirst() }
@@ -289,9 +291,10 @@ default: break  // fall through to the one-shot probe below
 // share the bundle id). NSWorkspace.runningApplications needs no permission.
 var selfPids = Set<Int>()
 if selfPid > 0 { selfPids.insert(selfPid) }
-if let bundle = selfBundle {
+if let bundle = selfBundle { excludedBundles.insert(bundle) }
+if !excludedBundles.isEmpty {
     for app in NSWorkspace.shared.runningApplications {
-        if app.bundleIdentifier == bundle { selfPids.insert(Int(app.processIdentifier)) }
+        if let bundle = app.bundleIdentifier, excludedBundles.contains(bundle) { selfPids.insert(Int(app.processIdentifier)) }
     }
 }
 

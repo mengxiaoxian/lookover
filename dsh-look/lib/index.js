@@ -1,40 +1,21 @@
-// dsh-look — M0 + M3 + M2-lite scene-awareness plugin (host half).
-//
-// - `look` agent tool: pull model — spawn the Swift helper once per call, no
-//   polling/tracking/state; audit line per read; system-prompt guidance.
-// - Global hotkey (default Ctrl+Alt+L): watcher helper notifies the host,
-//   which snapshots `look` while the target app is STILL frontmost (selection
-//   intact), then activates DSH. The snapshot rides the next user message as
-//   hidden context (agent/pre-step injection, TTL-bounded).
+// dsh-look: explicit, read-only window context for the official desktop.
 import { spawn } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { appendFile, mkdir } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createInterface } from 'node:readline'
 
 export const name = 'dsh-look'
 export const inject = ['tools', 'systemPrompt']
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
-// Prebuilt per-arch helper; falls back to bin/look (npm run build:native).
-const BIN_DIR = join(ROOT, '..', 'bin')
-const ARCH_BIN = process.arch === 'arm64' ? 'look-arm64' : process.arch === 'x64' ? 'look-x64' : null
-const HELPER = ARCH_BIN && existsSync(join(BIN_DIR, ARCH_BIN)) ? join(BIN_DIR, ARCH_BIN) : join(BIN_DIR, 'look')
+const HELPER = join(ROOT, '..', 'bin', 'look')
 // Self-identification: the host (this process) is inside the DSH app.
-// Override with DSH_SELF_BUNDLE when running inside a differently-bundled DSH desktop build.
-const SELF_BUNDLE = process.env.DSH_SELF_BUNDLE || 'local.menke.xiaoguang.dsh'
+const OFFICIAL_DESKTOP = process.execPath.includes('/DeepSeek Harness.app/Contents/')
+const SELF_BUNDLE = process.env.DSH_SELF_BUNDLE || (OFFICIAL_DESKTOP ? 'com.deepseek.dsh' : 'local.menke.xiaoguang.dsh')
+const EXCLUDED_BUNDLES = ['local.menke.xiaoguang.companion.proof']
 const HELPER_TIMEOUT_MS = 8000
-// Summon hotkey: ⌥⌘Z — the DSH app's own bubble/expand toggle. Our listen-only
-// event tap rides the same combo: one press summons the app (built-in shortcut)
-// AND captures a look snapshot (attached to the next message as hidden context).
-const HOTKEY_ARGS = ['--key-code', '6']
-const NEW_HOTKEY_KEYCODE = 45  // kVK_ANSI_N — ⌥⌘N starts a new session
-const SNAPSHOT_TTL_MS = 5 * 60 * 1000
-const HOTKEY_DEBOUNCE_MS = 600
-
 const PROMPT_TEXT = [
   '你可以用 look 工具查看用户当前正在使用的应用窗口。',
   '',
@@ -84,7 +65,7 @@ function runHelper(extraArgs = []) {
       reject(new Error(`look helper missing at ${HELPER}. Run npm run build:native.`))
       return
     }
-    const child = spawn(HELPER, [...extraArgs, '--self-bundle', SELF_BUNDLE, '--self-pid', String(process.pid)], {
+    const child = spawn(HELPER, [...extraArgs, '--self-bundle', SELF_BUNDLE, ...EXCLUDED_BUNDLES.flatMap(bundle => ['--exclude-bundle', bundle]), '--self-pid', String(process.pid)], {
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     let stdout = ''
@@ -182,133 +163,4 @@ export function apply(ctx) {
     },
   })
 
-  // ---- M2-lite: summon-hotkey snapshot (⌥⌘Z) ------------------------------
-  //
-  // The DSH app's own ⌥⌘Z toggles bubble/expand; our listen-only tap rides the
-  // same combo. On press we snapshot `look` immediately — the target app is
-  // still frontmost, focus alive, selection intact — and attach it as hidden
-  // context to the user's next message. We deliberately do NOT activate DSH
-  // ourselves: the app's shortcut owns the summon/toggle semantics.
-  let pendingSnapshot = null
-  let lastHotkeyAt = 0
-  let watcher = null
-  let watcherRestartTimer = null
-
-  const onHotkey = () => {
-    const now = Date.now()
-    if (now - lastHotkeyAt < HOTKEY_DEBOUNCE_MS) return
-    lastHotkeyAt = now
-    void runHelper()
-      .then(async (result) => {
-        pendingSnapshot = { ...result, source: 'hotkey' }
-        await audit(pendingSnapshot)
-      })
-      .catch((error) => {
-        ctx.logger?.warn?.(`[dsh-look] hotkey snapshot failed: ${error instanceof Error ? error.message : String(error)}`)
-      })
-    // P1-lite: after summon/expand, drop keyboard focus into the input box so
-    // the user can type/dictate immediately (no manual click). The app's own
-    // ⌥⌘Z toggle owns expand; we just focus whatever text field materializes.
-    // The helper retries for ~2.5s; harmless no-op when collapsing.
-    setTimeout(() => {
-      const child = spawn(HELPER, ['focus-input', '--self-bundle', SELF_BUNDLE], { stdio: ['ignore', 'pipe', 'pipe'] })
-      let out = ''
-      child.stdout.on('data', (c) => { out += c.toString('utf8') })
-      child.on('exit', () => {
-        try {
-          const r = JSON.parse(out.trim().split('\n').filter(Boolean).at(-1) || '{}')
-          if (r.ok) ctx.logger?.info?.(`[dsh-look] input focused after summon (visited=${r.visited})`)
-        } catch { /* ignore */ }
-      })
-      child.on('error', () => { /* ignore */ })
-    }, 600)
-  }
-
-  // ⌥⌘N: start a new session by AXPressing the sidebar "新建会话" button —
-  // no built-in hotkey exists in the app UI for it.
-  const onNewSession = () => {
-    const child = spawn(HELPER, ['new-session', '--self-bundle', SELF_BUNDLE], { stdio: ['ignore', 'pipe', 'pipe'] })
-    let out = ''
-    child.stdout.on('data', (c) => { out += c.toString('utf8') })
-    child.on('exit', () => {
-      try {
-        const r = JSON.parse(out.trim().split('\n').filter(Boolean).at(-1) || '{}')
-        ctx.logger?.info?.(`[dsh-look] new-session press ok=${r.ok} label=${r.label ?? r.note ?? ''}`)
-      } catch { /* ignore */ }
-    })
-    child.on('error', () => { /* ignore */ })
-  }
-
-  const startWatcher = () => {
-    if (!existsSync(HELPER)) return
-    stopWatcher()
-    const child = spawn(HELPER, ['watch', ...HOTKEY_ARGS, '--new-key-code', String(NEW_HOTKEY_KEYCODE)], { stdio: ['ignore', 'pipe', 'pipe'] })
-    watcher = child
-    const rl = createInterface({ input: child.stdout })
-    rl.on('line', (line) => {
-      let parsed
-      try { parsed = JSON.parse(line) } catch { return }
-      if (parsed?.event === 'hotkey') onHotkey()
-      else if (parsed?.event === 'new_session') onNewSession()
-      else if (parsed?.event === 'ready') {
-        ctx.logger?.info?.(`[dsh-look] hotkey watcher ready (keyCode=${parsed.keyCode} modifiers=${parsed.modifiers})`)
-      } else if (parsed?.error) {
-        ctx.logger?.warn?.(`[dsh-look] hotkey watcher: ${parsed.error} ${parsed.note || ''}`)
-      }
-    })
-    child.stderr.on('data', (chunk) => {
-      ctx.logger?.warn?.(`[dsh-look] watcher stderr: ${chunk.toString('utf8').trim()}`)
-    })
-    child.on('exit', () => {
-      rl.close()
-      if (watcher === child) watcher = null
-      // auto-restart with backoff so the hotkey survives helper crashes
-      watcherRestartTimer = setTimeout(startWatcher, 2000)
-      watcherRestartTimer.unref?.()
-    })
-  }
-
-  const stopWatcher = () => {
-    if (watcherRestartTimer) clearTimeout(watcherRestartTimer)
-    watcherRestartTimer = null
-    if (!watcher) return
-    try { watcher.kill() } catch {}
-    watcher = null
-  }
-
-  const renderSnapshotText = (snap) => {
-    const parts = ['用户在别的应用里按下召唤热键时抓取的屏幕上下文（look 快照）。这是真实读取到的内容，可作为当前上下文使用；快照里没有的信息仍然不要猜测。']
-    parts.push(JSON.stringify(snap, null, 2))
-    return parts.join('\n')
-  }
-
-  ctx.on('agent/pre-step', async ({ step, signal }, next) => {
-    const decision = await next()
-    if (decision.kind === 'reject' || signal.aborted || step !== 1) return decision
-    if (!pendingSnapshot) return decision
-    const snap = pendingSnapshot
-    pendingSnapshot = null
-    if (Date.now() - Number(snap.ts || 0) > SNAPSHOT_TTL_MS) return decision
-    const text = renderSnapshotText(snap)
-    return {
-      ...decision,
-      messages: [...decision.messages, Object.freeze({
-        id: randomUUID(),
-        role: 'user',
-        content: [{ type: 'text', text }],
-        source: {
-          kind: 'plugin',
-          plugin: name,
-          form: 'snapshot',
-          sections: [{ name, text }],
-        },
-      })],
-    }
-  }, { prepend: true })
-
-  startWatcher()
-  ctx.effect(() => () => {
-    stopWatcher()
-    pendingSnapshot = null
-  }, 'dsh-look: hotkey watcher')
 }
