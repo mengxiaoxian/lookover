@@ -22,16 +22,17 @@
 
 ## 下载与安装
 
-本轮预构建包见 [GitHub Releases](https://github.com/mengxiaoxian/lookover/releases/tag/lookover-2026.10.12)：`dsh-bubble@0.3.4`、`dsh-look@0.1.1`、`dsh-expmem@0.1.1`，无需本机编译 Swift。
+三个插件已发布到 npm：[dsh-bubble@0.3.4](https://www.npmjs.com/package/dsh-bubble)、[dsh-look@0.1.1](https://www.npmjs.com/package/dsh-look)、[dsh-expmem@0.1.1](https://www.npmjs.com/package/dsh-expmem)。包内附预编译组件，无需本机编译 Swift；[GitHub Release](https://github.com/mengxiaoxian/lookover/releases/tag/lookover-2026.10.12) 保留相同版本包与 SHA256 校验清单作为备用。
 
 **当前组合目标：macOS Apple Silicon（arm64）＋官方 DeepSeek Harness 0.2.0-rc.2 桌面版。** 其他系统、Intel Mac 和后续宿主版本尚未完成这套组合的验收；包内声明此次宿主版本。
 
 关闭 DSH 后，在终端运行，再正常打开官方应用：
 
 ```sh
-dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-bubble-0.3.4.tgz
-dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-look-0.1.1.tgz
-dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-expmem-0.1.1.tgz
+# 先体验气泡与页面上下文
+dsh plugin --profile desktop add dsh-bubble@0.3.4 dsh-look@0.1.1
+# 需要保存与复用经验时再安装
+dsh plugin --profile desktop add dsh-expmem@0.1.1
 ```
 
 没有 `dsh` 命令时，把命令开头的 `dsh` 替换为官方内置 CLI：
@@ -40,7 +41,7 @@ dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releas
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh"
 ```
 
-只想体验一个插件，就只执行对应命令。插件市场收录需维护者合并目录更新，提交成功不代表已经上架。npm 现有 Look、经验插件 0.1.0 是旧发布，此次以 GitHub 的明确版本包为准。
+只想体验一个插件，就只保留对应包名。气泡的市场收录及三张卡片的新说明仍在[草稿 PR #7207](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7207)，尚未合并。npm 包发布不等于市场卡片文案已更新；市场目录的版本同步也可能滞后，以 npm 上的公开版本和本文为准。
 
 已装本地 `dsh-xiaoguang-companion-proof` 的用户，请先停用旧气泡插件，再装 `dsh-bubble`，避免双开；无需删除会话历史。新用户直接安装。
 
