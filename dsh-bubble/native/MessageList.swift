@@ -8,21 +8,21 @@ final class MessageCard: NSView {
     let bubble=FlippedView()
     let role:String
     let skin:ConversationSkin
-    init(role:String,text:String,skin:ConversationSkin,streaming:Bool=false) {
+    init(role:String,text:String,skin:ConversationSkin,streaming:Bool=false,formatted:NSAttributedString?=nil) {
         self.role=role;self.skin=skin;super.init(frame:.zero)
         name.stringValue=role=="user" ? "你" : skin.assistantName+(streaming ? " · 回复中" : "")
         name.font = .systemFont(ofSize:11,weight:.medium);name.textColor=skin.muted
         name.alignment=role=="user" ? .right : .left
         addSubview(name);addSubview(bubble);bubble.wantsLayer=true;bubble.layer?.cornerRadius=14
         bubble.layer?.backgroundColor=(role=="user" ? skin.userBackground : NSColor.clear).cgColor
-        body.isEditable=false;body.isSelectable=true;body.isRichText=false;body.drawsBackground=false
+        body.isEditable=false;body.isSelectable=true;body.isRichText=true;body.drawsBackground=false
         body.isVerticallyResizable=false;body.isHorizontallyResizable=false
         body.autoresizingMask=[];bubble.autoresizesSubviews=false
         // Leave room for glyph ink that extends beyond its typographic advance.
         body.textContainerInset = NSSize(width:0,height:3);body.textContainer?.lineFragmentPadding=5
         body.isHorizontallyResizable=false;body.textContainer?.widthTracksTextView=true
-        let paragraph=NSMutableParagraphStyle();paragraph.lineSpacing=5;paragraph.paragraphSpacing=7
-        body.textStorage?.setAttributedString(NSAttributedString(string:text,attributes:[.font:NSFont.systemFont(ofSize:skin.fontSize),.foregroundColor:skin.foreground,.paragraphStyle:paragraph]))
+        body.textStorage?.setAttributedString(formatted ?? (role=="assistant" ? MessageMarkdown.render(text,skin:skin) : MessageMarkdown.plain(text,skin:skin)))
+        body.linkTextAttributes=[.foregroundColor:skin.accent,.underlineStyle:NSUnderlineStyle.single.rawValue]
         body.setAccessibilityLabel(role=="user" ? "你的消息" : "助手回复")
         bubble.addSubview(body)
         if role != "user" {
@@ -53,16 +53,24 @@ final class MessageCard: NSView {
 final class MessageList:NSView {
     override var isFlipped:Bool {true}
     var cards:[MessageCard]=[]
-    func render(messages:[[String:Any]],partial:String,skin:ConversationSkin,width:CGFloat,minimumHeight:CGFloat) {
+    private var formattedCache:[String:NSAttributedString]=[:]
+    func render(messages:[[String:Any]],partial:String,skin:ConversationSkin,width:CGFloat,minimumHeight:CGFloat,resetFormatting:Bool=false) {
+        if resetFormatting {formattedCache=[:]}
         subviews.forEach{$0.removeFromSuperview()};cards=[]
         var rows=messages
         if !partial.isEmpty {rows.append(["role":"assistant","text":partial,"streaming":true])}
         var y:CGFloat=12
+        var nextCache:[String:NSAttributedString]=[:]
         for row in rows {
-            let card=MessageCard(role:row["role"] as? String ?? "assistant",text:row["text"] as? String ?? "",skin:skin,streaming:row["streaming"] as? Bool ?? false)
+            let role=row["role"] as? String ?? "assistant",text=row["text"] as? String ?? ""
+            let key=role+"\u{0}"+text
+            let formatted=formattedCache[key] ?? (role=="assistant" ? MessageMarkdown.render(text,skin:skin) : MessageMarkdown.plain(text,skin:skin))
+            nextCache[key]=formatted
+            let card=MessageCard(role:role,text:text,skin:skin,streaming:row["streaming"] as? Bool ?? false,formatted:formatted)
             let height=card.fit(width:width-16);card.frame.origin=NSPoint(x:8,y:y)
             addSubview(card);cards.append(card);y+=height+24
         }
+        formattedCache=nextCache
         if rows.isEmpty {
             let title=NSTextField(labelWithString:"开始一段新对话")
             title.font = .systemFont(ofSize:18,weight:.semibold);title.textColor=skin.foreground

@@ -155,7 +155,7 @@ final class ConversationWindow:NSObject,NSTextViewDelegate,NSWindowDelegate {
         guard force || key != lastContent else {return}
         let nearBottom=transcriptScroll.documentVisibleRect.maxY >= transcript.frame.height-50
         lastContent=key
-        transcript.render(messages:lastMessages,partial:lastPartial,skin:skin,width:transcriptScroll.contentSize.width,minimumHeight:transcriptScroll.contentSize.height)
+        transcript.render(messages:lastMessages,partial:lastPartial,skin:skin,width:transcriptScroll.contentSize.width,minimumHeight:transcriptScroll.contentSize.height,resetFormatting:force)
         if nearBottom || resetScroll {
             transcriptScroll.contentView.scroll(to:NSPoint(x:0,y:max(0,transcript.frame.height-transcriptScroll.contentSize.height)))
             transcriptScroll.reflectScrolledClipView(transcriptScroll.contentView)

@@ -22,7 +22,7 @@
 
 ## 下载与安装
 
-三个插件已发布到 npm：[dsh-bubble@0.3.4](https://www.npmjs.com/package/dsh-bubble)、[dsh-look@0.1.1](https://www.npmjs.com/package/dsh-look)、[dsh-expmem@0.1.1](https://www.npmjs.com/package/dsh-expmem)。包内附预编译组件，无需本机编译 Swift；[GitHub Release](https://github.com/mengxiaoxian/lookover/releases/tag/lookover-2026.10.12) 保留相同版本包与 SHA256 校验清单作为备用。
+三个插件已发布到 npm：[dsh-bubble@0.3.5](https://www.npmjs.com/package/dsh-bubble)、[dsh-look@0.1.1](https://www.npmjs.com/package/dsh-look)、[dsh-expmem@0.1.1](https://www.npmjs.com/package/dsh-expmem)。包内附预编译组件，无需本机编译 Swift；[GitHub Release](https://github.com/mengxiaoxian/lookover/releases/tag/lookover-2026.10.12) 保留相同版本包与 SHA256 校验清单作为备用。
 
 **当前组合目标：macOS Apple Silicon（arm64）＋官方 DeepSeek Harness 0.2.0-rc.2 桌面版。** 其他系统、Intel Mac 和后续宿主版本尚未完成这套组合的验收；包内声明此次宿主版本。
 
@@ -30,7 +30,7 @@
 
 ```sh
 # 先体验气泡与页面上下文
-dsh plugin --profile desktop add dsh-bubble@0.3.4 dsh-look@0.1.1
+dsh plugin --profile desktop add dsh-bubble@0.3.5 dsh-look@0.1.1
 # 需要保存与复用经验时再安装
 dsh plugin --profile desktop add dsh-expmem@0.1.1
 ```
@@ -56,8 +56,8 @@ dsh plugin --profile desktop add dsh-expmem@0.1.1
 
 ## 气泡预览
 
-![默认悬浮对话](dsh-bubble/screenshots/ui-plain.png)
-![小光外观](dsh-bubble/screenshots/ui-xiaoguang.png)
+![默认悬浮对话](dsh-bubble/screenshots/markdown-none.png)
+![小光外观](dsh-bubble/screenshots/markdown-xiaoguang.png)
 
 外观切换不改变会话或任务。截图来自独立验收对话。
 

@@ -4,7 +4,7 @@
 
 属于 [lookover 桌面助手组合](../README.md)：搭配 [dsh-look](../dsh-look/) 理解当前页面、选中文字或报错，再用 [dsh-expmem](../dsh-expmem/) 保留解决经验。也可独立使用；屏幕读取和记忆不会随气泡自动安装。
 
-![默认悬浮对话](https://raw.githubusercontent.com/mengxiaoxian/lookover/main/dsh-bubble/screenshots/ui-plain.png)
+![默认悬浮对话](https://raw.githubusercontent.com/mengxiaoxian/lookover/main/dsh-bubble/screenshots/markdown-none.png)
 
 ## 如何用
 
@@ -30,19 +30,21 @@
 
 ## 安装
 
-`0.3.4` 面向 **macOS arm64＋官方 DeepSeek Harness 0.2.0-rc.2**。关闭 DSH 后安装，再打开：
+`0.3.5` 面向 **macOS arm64＋官方 DeepSeek Harness 0.2.0-rc.2**。关闭 DSH 后安装，再打开：
 
 ```sh
-dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-bubble-0.3.4.tgz
+dsh plugin --profile desktop add https://github.com/mengxiaoxian/lookover/releases/download/lookover-2026.10.12/dsh-bubble-0.3.5.tgz
 ```
 
 没有 `dsh` 命令时见[官方内置 CLI 用法](../README.md#下载与安装)。包内附原生助手，无需编译。已装本地 `dsh-xiaoguang-companion-proof` 时先停用旧插件，避免双开。
 
 ## 验证与边界
 
-原型 0.3.3 已在官方完整应用验证真实发送、流式文本、停止后继续、主窗口往返、同一会话及换肤；公开 0.3.4 调整包名与分发元信息，沿用对话链路并另行执行回归。结果见[发布记录](../docs/release-2026-10-12.md)。
+原型 0.3.3 已在官方完整应用验证真实发送、流式文本、停止后继续、主窗口往返、同一会话及换肤；公开 0.3.4 调整包名与分发元信息；0.3.5 新增常用 Markdown 排版，保持原对话与任务链路。结果见[发布记录](../docs/release-2026-10-12.md)。
 
-- 当前为文本界面，不提供 Markdown 排版、附件、模型设置或完整冷历史导航。
+- 支持常用 Markdown：粗体、斜体、标题、列表、引用、删除线、行内代码、代码块和网页链接。颜文字及代码块内的空格、缩进和换行保留。
+- 用户消息保持原文；助手显示排版不改 Host 会话原文。流式代码块尚未闭合时也能显示。
+- 表格暂保留 Markdown 源码；图片只显示说明文字，不自动加载外部资源。附件、模型设置和完整冷历史导航仍回主窗口。
 - 工具授权在官方主窗口处理；完整审批往返未验收。
 - 本版没有全局召唤热键，不包含语音识别服务。
 - 原生助手为本地临时签名，无 Apple 开发者签名与公证，跨机器首次启动仍需验证。
